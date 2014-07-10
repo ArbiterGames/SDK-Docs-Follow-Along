@@ -7,7 +7,7 @@ public class MainMenu : MonoBehaviour {
 	private static int padding = 10;
 	private static int buttonHeight = 100;
 	private static int boxWidth = Screen.width - padding * 2;
-	private static int boxHeight = buttonHeight * 4 + padding * 3;
+	private static int boxHeight = buttonHeight * 5 + padding * 3;
 	private static int boxY = (Screen.height - boxHeight) / 2;
 	private static int buttonWidth = boxWidth - padding * 2;
 	
@@ -36,7 +36,11 @@ public class MainMenu : MonoBehaviour {
 			Arbiter.JoinTournament( betSize, filters, OnTournamentReturned );
 		}
 		
-		if(GUI.Button(new Rect(padding * 2, buttonHeight * 3 + padding * 2 + boxY, buttonWidth, buttonHeight), "Logout", buttonStyle)) {
+		if(GUI.Button(new Rect(padding * 2, buttonHeight * 3 + padding * 2 + boxY, buttonWidth, buttonHeight), "Previous Tournaments", buttonStyle)) {
+			Arbiter.ViewPreviousTournaments( OnViewPreviousTournamentsClosed );
+		}
+		
+		if(GUI.Button(new Rect(padding * 2, buttonHeight * 4 + padding * 3 + boxY, buttonWidth, buttonHeight), "Logout", buttonStyle)) {
 			Arbiter.Logout( LogoutCallback );
 		}
 	}
@@ -46,7 +50,13 @@ public class MainMenu : MonoBehaviour {
 	}
 	
 	private void OnTournamentReturned( Arbiter.Tournament tournament ) {
+		// TODO: I need to pass the tournamentID to
 		Debug.Log ("tournament: " + tournament.Id);
+		Application.LoadLevel("Game");
+	}
+	
+	private void OnViewPreviousTournamentsClosed() {
+		Debug.Log ("ViewPreviousTournaments closed");
 	}
 	
 	private void LogoutCallback() {

@@ -5,7 +5,7 @@
 	<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 	<ProductVersion>10.0.20506</ProductVersion>
 	<SchemaVersion>2.0</SchemaVersion>
-	<ProjectGuid>{1313070B-D765-2142-111E-D9743A1EFFA8}</ProjectGuid>
+	<ProjectGuid>{ECAD6988-4B77-F53E-ED50-4300ED37F9C5}</ProjectGuid>
 	<OutputType>Library</OutputType>
 	<AppDesignerFolder>Properties</AppDesignerFolder>
 	<RootNamespace></RootNamespace>
@@ -46,13 +46,14 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Game.cs" />
      <Compile Include="Assets\Login.cs" />
      <Compile Include="Assets\MainMenu.cs" />
      <Compile Include="Assets\Verification.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
-      <Project>{2CBAB386-7EFC-6879-299A-F42F62EACEE6}</Project>      <Name>Assembly-CSharp-firstpass</Name>    </ProjectReference>
+      <Project>{8DE3059E-B607-7785-92FE-A66E6BE9DDB3}</Project>      <Name>Assembly-CSharp-firstpass</Name>    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
