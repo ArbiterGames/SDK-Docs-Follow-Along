@@ -41,6 +41,7 @@ public class MainMenu : MonoBehaviour {
 			string betSize = "0";
 			Dictionary<string,string> filters = new Dictionary<string,string>();
 			filters.Add("level", "2");
+			Debug.Log("++ MainMenu.cs - calling Arbiter.JoinTournament");
 			Arbiter.JoinTournament( betSize, filters, OnTournamentReturned );
 		}
 		
@@ -66,6 +67,7 @@ public class MainMenu : MonoBehaviour {
 	}
 	
 	private void OnTournamentReturned( Arbiter.Tournament tournament ) {
+		Debug.Log ("++ MainMenu.cs - OnTournamentReturned");
 		GameObject go = GameObject.Find("GameState");
 		GameState gameState = go.GetComponent<GameState>();
 		gameState.CurrentTournamentId = tournament.Id;

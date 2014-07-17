@@ -28,12 +28,12 @@ public class Game : MonoBehaviour {
 		GUI.Box(new Rect(padding, boxY, boxWidth, boxHeight), "The Game", boxStyle);
 	
 		if ( scoreReported ) {
-			GUI.Label(new Rect(padding * 2, boxY, buttonWidth, buttonHeight), resultsDescription, labelStyle);
+			GUI.Label(new Rect(padding * 2, boxY + padding, buttonWidth, buttonHeight), resultsDescription, labelStyle);
 			if(GUI.Button(new Rect(padding * 2, buttonHeight + boxY + padding, buttonWidth, buttonHeight), "Back to Main Menu", buttonStyle)) {
 				Application.LoadLevel ("MainMenu");
 			}
 		} else {
-			if(GUI.Button(new Rect(padding * 2, buttonHeight + boxY, buttonWidth, buttonHeight), "Play", buttonStyle)) {
+			if(GUI.Button(new Rect(padding * 2, buttonHeight + boxY + padding, buttonWidth, buttonHeight), "Play", buttonStyle)) {
 				GameObject go = GameObject.Find("GameState");
 				GameState gameState = go.GetComponent<GameState>();
 				score = (int)UnityEngine.Random.Range( 1f, 100f );
@@ -43,8 +43,6 @@ public class Game : MonoBehaviour {
 	}
 	
 	void OnScoreReported( Arbiter.Tournament tournament ) {
-		Debug.Log("OnScoreReported tournament:" + tournament);
-		
 		scoreReported = true;
 		
 		if( tournament.Status == Arbiter.Tournament.StatusType.Complete ) {
