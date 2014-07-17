@@ -11,6 +11,13 @@ public class MainMenu : MonoBehaviour {
 	private static int boxY = (Screen.height - boxHeight) / 2;
 	private static int buttonWidth = boxWidth - padding * 2;
 	
+	void Awake() {
+		if ( GameObject.Find("GameState") == null ) {
+			GameObject go = new GameObject( "GameState" );
+			go.AddComponent<GameState>();
+		}
+	}
+	
 	void OnGUI() {
 	
 		GUIStyle buttonStyle = new GUIStyle("button");
@@ -59,8 +66,9 @@ public class MainMenu : MonoBehaviour {
 	}
 	
 	private void OnTournamentReturned( Arbiter.Tournament tournament ) {
-		// TODO: I need to pass the tournamentID to
-		Debug.Log ("tournament: " + tournament.Id);
+		GameObject go = GameObject.Find("GameState");
+		GameState gameState = go.GetComponent<GameState>();
+		gameState.CurrentTournamentId = tournament.Id;
 		Application.LoadLevel("Game");
 	}
 	
