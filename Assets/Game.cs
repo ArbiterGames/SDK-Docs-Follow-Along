@@ -37,6 +37,10 @@ public class Game : MonoBehaviour {
 				GameObject go = GameObject.Find("GameState");
 				GameState gameState = go.GetComponent<GameState>();
 				score = (int)UnityEngine.Random.Range( 1f, 100f );
+<<<<<<< HEAD
+=======
+				Debug.Log ("Reporting score for tournament: " + gameState.CurrentTournamentId);
+>>>>>>> 3d3c3e8aafd6f4c02554c3359dab7c831a254f14
 				Arbiter.ReportScore( gameState.CurrentTournamentId, score, OnScoreReported );
 			}
 		}
