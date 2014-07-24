@@ -1,8 +1,10 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="../Arbiter Example/ExampleApp/Assets/Plugins/Arbiter/Arbiter.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Plugins/Arbiter/ArbiterBinding.cs">
     <Files>
-      <File FileName="../Arbiter Example/ExampleApp/Assets/Plugins/Arbiter/Arbiter.cs" Line="101" Column="3" />
+      <File FileName="../oregontrailrush/OregonTrailRush/Assets/Plugins/Arbiter/Tournament.cs" Line="74" Column="3" />
+      <File FileName="../Arbiter Example/ExampleApp/Assets/Plugins/Arbiter/ArbiterBinding.cs" Line="458" Column="14" />
+      <File FileName="Assets/Plugins/Arbiter/ArbiterBinding.cs" Line="470" Column="5" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

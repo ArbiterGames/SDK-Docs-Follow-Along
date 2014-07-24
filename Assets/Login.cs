@@ -15,7 +15,7 @@ public class Login : MonoBehaviour {
 	
 	void Start() {
 		if ( Arbiter.IsAuthenticated ) {
-			if ( Arbiter.Verified ) {
+			if ( Arbiter.IsVerified ) {
 				Application.LoadLevel("MainMenu");
 			} else {
 				Application.LoadLevel("Verification");
@@ -56,14 +56,13 @@ public class Login : MonoBehaviour {
 	
 	private void LoginCallback() {
 		if ( Arbiter.IsAuthenticated ) {
-			if ( Arbiter.Verified ) {
+			if ( Arbiter.IsVerified ) {
 				Application.LoadLevel("MainMenu");
 			} else {
 				Application.LoadLevel("Verification");
 			}
 		} else {
 			Debug.Log ("Error logging in");
-		}
-		
+		}	
 	}
 }

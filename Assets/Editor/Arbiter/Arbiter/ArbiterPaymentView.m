@@ -34,7 +34,40 @@
 
 - (id)initWithFrame:(CGRect)frame andCallback:(void(^)(void))handler forUser:(NSDictionary *)userDict
 {
-    self = [super initWithFrame:CGRectInset(frame, 25, 50)];
+    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+    
+    BOOL isLandscape = orientation == 3 || orientation == 4 || orientation == 5;
+    float trueScreenHeight = [UIScreen mainScreen].bounds.size.height;
+    float trueScreenWidth = [UIScreen mainScreen].bounds.size.width;
+    float maxWidth = 420.0f;
+    float maxHeight = 285.0f;
+    
+    if ( isLandscape ) {
+        trueScreenHeight = [UIScreen mainScreen].bounds.size.width;
+        trueScreenWidth = [UIScreen mainScreen].bounds.size.height;
+        
+        float wrongWidth = frame.size.width;
+        float wrongHeight = frame.size.height;
+        frame.size.width = wrongHeight;
+        frame.size.height = wrongWidth;
+    }
+    
+    if ( frame.size.height > maxHeight ) {
+        frame.size.height = maxHeight;
+    }
+    
+    if ( frame.size.width > maxWidth ) {
+        frame.size.width = maxWidth;
+    }
+    
+    frame.size.width -= 25.0f;
+    frame.size.height -= 25.0f;
+    
+    self = [super initWithFrame:CGRectMake((trueScreenWidth - frame.size.width) / 2,
+                                           (trueScreenHeight - frame.size.height) / 2,
+                                           frame.size.width,
+                                           frame.size.height)];
+
     if (self) {
         parentFrame = &(frame);
         user = userDict;
@@ -56,21 +89,12 @@
 - (void)setupBundleSelectLayout
 {
     UILabel *title = [[UILabel alloc] initWithFrame:CGRectMake(0.0f, 10.0f, self.bounds.size.width, 40.0f)];
-    [title setText:@"Deposit Credits"];
+    [title setText:@"How many credits would you like?"];
     [title setFont:[UIFont boldSystemFontOfSize:17]];
     [title setTextAlignment:NSTextAlignmentCenter];
     [title setTag:BUNDLE_SELECT_TAG];
     [self addSubview:title];
-    
-    UILabel *message = [[UILabel alloc] initWithFrame:CGRectMake(10.0f, 40.0f, self.bounds.size.width - 20.0f, 50.0f)];
-    [message setText:@"Select the amount of credits you would like to buy."];
-    [message setNumberOfLines:0];
-    [message setFont:[UIFont systemFontOfSize:14]];
-    [message setTextAlignment:NSTextAlignmentCenter];
-    [message setTag:BUNDLE_SELECT_TAG];
-    [message setBackgroundColor:[UIColor clearColor]];
-    [self addSubview:message];
-    
+
     [self renderCancelButton];
     [self renderSelectButton];
     [self renderBundleOptions];
@@ -79,22 +103,18 @@
 - (void)setupBillingInfoLayout
 {
     CGRect frame = self.frame;
-    frame.size.height = 240;
-    frame.size.width = frame.size.width + 30;
-    frame.origin.y = 10;
-    frame.origin.x = 10;
+    frame.size.height = 140;
+    frame.origin.y = ([UIScreen mainScreen].bounds.size.width / 2 - frame.size.height) / 2;
     [self setFrame:frame];
 
-    self.stripeView = [[STPView alloc] initWithFrame:CGRectMake(5, 70, frame.size.width - 10, 40)
+    self.stripeView = [[STPView alloc] initWithFrame:CGRectMake(70.0f, 40.0f, frame.size.width, 40.0f)
                                               andKey:@"pk_test_1SQ84edElZEWoGqlR7XB9V5j"];
     self.stripeView.delegate = self;
     [self addSubview:self.stripeView];
     
-    UILabel *message = [[UILabel alloc] initWithFrame:CGRectMake(10, 10, self.bounds.size.width - 20, 50)];
-    NSString *valueText = [self addThousandsSeparatorToString:[selectedBundle objectForKey:@"value"]];
-    NSString *messageBody = [NSString stringWithFormat:@"Enter your billing info for purchasing\n%@ credits for $%@", valueText, [selectedBundle objectForKey:@"price"]];
-    [message setText:messageBody];
-    [message setFont:[UIFont systemFontOfSize:14]];
+    UILabel *message = [[UILabel alloc] initWithFrame:CGRectMake(0.0f, 5.0f, self.bounds.size.width, 40.0f)];
+    [message setText:@"Enter Billing Information"];
+    [message setFont:[UIFont boldSystemFontOfSize:17]];
     [message setTextAlignment:NSTextAlignmentCenter];
     [message setBackgroundColor:[UIColor clearColor]];
     [message setTag:PAYMENT_INFO_TAG];
@@ -158,7 +178,7 @@
 {
     
     UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
-    [button setFrame:CGRectMake(0, self.bounds.size.height - 50 * 2, self.bounds.size.width, 50)];
+    [button setFrame:CGRectMake(self.bounds.size.width / 2, self.bounds.size.height - 50, self.bounds.size.width / 2, 50)];
     [button setTitle:@"Next" forState:UIControlStateNormal];
     [button.titleLabel setFont:[UIFont boldSystemFontOfSize:17]];
     [button setTag:BUNDLE_SELECT_TAG];
@@ -175,7 +195,7 @@
 - (void)renderCancelButton
 {
     UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
-    [button setFrame:CGRectMake(0, self.bounds.size.height - 50, self.bounds.size.width, 50)];
+    [button setFrame:CGRectMake(0, self.bounds.size.height - 50, self.bounds.size.width / 2, 50.0f)];
     [button setTitle:@"Cancel" forState:UIControlStateNormal];
     [button setTag:BUNDLE_SELECT_TAG];
     [button.titleLabel setFont:[UIFont systemFontOfSize:17]];
@@ -185,6 +205,11 @@
     topBorder.frame = CGRectMake(0, 0, button.frame.size.width, 0.5f);
     topBorder.backgroundColor = [[UIColor lightGrayColor] CGColor];
     [button.layer addSublayer:topBorder];
+    
+    CALayer *rightBorder = [CALayer layer];
+    rightBorder.frame = CGRectMake(button.frame.size.width - 0.5f, 0, 0.5f, button.frame.size.height);
+    rightBorder.backgroundColor = [[UIColor lightGrayColor] CGColor];
+    [button.layer addSublayer:rightBorder];
     
     [self addSubview:button];
 }
@@ -199,7 +224,7 @@
         [pickerView setTag:BUNDLE_SELECT_TAG];
         [pickerView setDataSource: self];
         [pickerView setDelegate: self];
-        [pickerView setFrame: CGRectMake(0, 70, self.bounds.size.width, 300)];
+        [pickerView setFrame: CGRectMake(0.0f, 40.0f, self.bounds.size.width, 180.0f)];
         pickerView.showsSelectionIndicator = YES;
         
         NSInteger selectedRow = 2;
@@ -230,11 +255,12 @@
 
 - (void)renderPurchaseButton
 {
-   // Keep it hidden until the payment form is correct
+    // Keep it hidden until the payment form is correct
     self.purchaseButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [self.purchaseButton setTitle:@"Submit" forState:UIControlStateNormal];
     [self.purchaseButton.titleLabel setFont:[UIFont boldSystemFontOfSize:17]];
-    [self.purchaseButton setFrame:CGRectMake(0, self.bounds.size.height - 50 * 2, self.bounds.size.width, 50)];
+    [self.purchaseButton setFrame:CGRectMake(self.bounds.size.width / 2, self.bounds.size.height - 50,
+                                              self.bounds.size.width / 2, 50)];
     self.purchaseButton.enabled = false;
     [self.purchaseButton setTag:PAYMENT_INFO_TAG];
     CALayer *topBorder = [CALayer layer];

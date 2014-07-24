@@ -104,6 +104,7 @@
                     @"signature":[signature base64EncodedStringWithOptions:0],
                     @"salt":[salt base64EncodedStringWithOptions:0],
                     @"playerID":localPlayer.playerID,
+                    @"game_center_username": localPlayer.alias,
                     @"bundleID":[[NSBundle mainBundle] bundleIdentifier]
                 };
 
@@ -265,17 +266,27 @@
 
 - (void)showWalletPanel:(void(^)(void))handler
 {
-    void (^connectionHandler)(void) = [^(void) {
+    void (^closeWalletHandler)(void) = [^(void) {
         handler();
     } copy];
+    [_alertViewHandlerRegistry setObject:closeWalletHandler forKey:@"closeWalletHandler"];
+    
+    void (^populateThenShowAlert)(void) = [^(void) {
+        NSString *title = [NSString stringWithFormat: @"Balance: %@ credits", [self.wallet objectForKey:@"balance"]];
+        NSString *message = [NSString stringWithFormat: @"Pending: %@ credits\nLogged in as: %@", [self.wallet objectForKey:@"pending_balance"], [self.user objectForKey:@"username"]];
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:@"Close" otherButtonTitles:@"Refresh", @"Deposit", @"Withdraw", nil];
+        [alert setTag:WALLET_ALERT_TAG];
+        [alert show];
+    } copy];
+    
+    if ( [[self.user objectForKey:@"agreed_to_terms"] boolValue] == false ) {
+        [self verifyUser:^(NSDictionary *dict) {
+            populateThenShowAlert();
+        }];
+    } else {
+        populateThenShowAlert();
+    }
 
-    [_alertViewHandlerRegistry setObject:connectionHandler forKey:@"closeWalletHandler"];
-
-    NSString *title = [NSString stringWithFormat: @"Balance: %@ credits", [self.wallet objectForKey:@"balance"]];
-    NSString *message = [NSString stringWithFormat: @"Pending: %@ credits\nLocation: %@", [self.wallet objectForKey:@"pending_balance"], [self.user objectForKey:@"postal_code"]];
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:@"Close" otherButtonTitles:@"Refresh", @"Deposit", @"Withdraw", nil];
-    [alert setTag:WALLET_ALERT_TAG];
-    [alert show];
 }
 
 - (void)showDepositPanel
@@ -291,7 +302,7 @@
                                                     forUser:[self user]];
     
     [paymentView setTag:PAYMENT_VIEW_TAG];
-    [[self getTopApplicationWindow] addSubview:paymentView];
+    [[self getTopApplicationWindow].rootViewController.view addSubview:paymentView];
    
     
     
@@ -315,7 +326,7 @@
                                                       forUser:[self user]
                                                     andWallet:[self wallet]];
     [withdrawView setTag:WITHDRAW_VIEW_TAG];
-    [[self getTopApplicationWindow] addSubview:withdrawView];
+    [[self getTopApplicationWindow].rootViewController.view addSubview:withdrawView];
     
 // TODO: Get the bitcoin option back in
 //    NSString *message = @"Where should we transfer your balance?";
@@ -351,18 +362,21 @@
  */
 - (void)requestTournament:(void(^)(NSDictionary *))handler buyIn:(NSString*)buyIn filters:(NSString*)filters
 {
-    NSDictionary *paramsDict = @{
-        @"buy_in":buyIn,
-        @"filters":filters
-    };
-
+    NSDictionary *paramsDict = @{@"buy_in":buyIn, @"filters":filters};
+    
     void (^connectionHandler)(NSDictionary *) = [^(NSDictionary *responseDict) {
-        NSLog(@"server returned: %@", responseDict);
         handler(responseDict);
     } copy];
-
-    NSLog(@"requesting tournament with params: %@", paramsDict);
-    [self httpPost:APITournamentCreateURL params:paramsDict handler:connectionHandler];
+    
+    if ( [[self.user objectForKey:@"agreed_to_terms"] boolValue] == false ) {
+        [self verifyUser:^(NSDictionary *dict) {
+            if ( [[dict objectForKey:@"success"] boolValue] == true ) {
+                [self httpPost:APITournamentCreateURL params:paramsDict handler:connectionHandler];
+            }
+        }];
+    } else {
+        [self httpPost:APITournamentCreateURL params:paramsDict handler:connectionHandler];
+    }
 }
 
 
@@ -532,6 +546,7 @@
 
 - (void)httpGet:(NSString*)url handler:(void(^)(NSDictionary*))handler {
     NSLog( @"ArbiterSDK GET %@", url );
+    
     NSMutableURLRequest *request = [NSMutableURLRequest
         requestWithURL:[NSURL URLWithString:url]
         cachePolicy:NSURLRequestUseProtocolCachePolicy
@@ -555,8 +570,8 @@
     NSError *error = nil;
     NSData *paramsData;
     NSString *paramsStr;
-    
     NSString *tokenValue;
+    
     if ( [self.user objectForKey:@"token"] != NULL ) {
         tokenValue = [NSString stringWithFormat:@"Token %@::%@", [self.user objectForKey:@"token"], self.apiKey];
     } else {
@@ -688,10 +703,12 @@
         }
 
     } else if ( alertView.tag == ENABLE_LOCATION_ALERT_TAG) {
-        void (^handler)(NSDictionary *) = [_alertViewHandlerRegistry objectForKey:@"enableLocationServices"];
-        [self verifyUser:^(NSDictionary *dict) {
-            handler(dict);
-        }];
+        if (buttonIndex == 1) {
+            void (^handler)(NSDictionary *) = [_alertViewHandlerRegistry objectForKey:@"enableLocationServices"];
+            [self verifyUser:^(NSDictionary *dict) {
+                handler(dict);
+            }];
+        }
     } else if ( alertView.tag == BITCOIN_DEPOSIT_ALERT_TAG ) {
         if ( [buttonTitle isEqualToString:@"Copy Address"] ) {
             [self copyDepositAddressToClipboard];

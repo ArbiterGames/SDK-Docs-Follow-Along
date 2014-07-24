@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Linq;
 
 public class Game : MonoBehaviour {
 	
@@ -46,10 +47,16 @@ public class Game : MonoBehaviour {
 		scoreReported = true;
 		
 		if( tournament.Status == Arbiter.Tournament.StatusType.Complete ) {
-			if( tournament.Winner.Id == Arbiter.UserId ) {
-				resultsDescription = "You won with a score of " + score + "!";
-			} else {
-				resultsDescription = "You lost " + tournament.Winner.Score + " to " + score;
+			if ( tournament.Winners != null ) {
+				if ( tournament.Winners.First() == Arbiter.UserId ) {
+					if ( tournament.Winners.Count() > 1 ) {
+						resultsDescription = "You tied!";
+					} else {
+						resultsDescription = "You won!";
+					}
+				} else {
+					resultsDescription = "You lost to " + tournament.Winners.First();
+				}
 			}
 		} else if( tournament.Status == Arbiter.Tournament.StatusType.InProgress || tournament.Status == Arbiter.Tournament.StatusType.Initializing ) {
 			resultsDescription = "You scored " + score + ".Waiting for opponent to finish.";
